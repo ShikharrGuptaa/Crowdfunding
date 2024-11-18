@@ -2,7 +2,7 @@ import axios from "axios";
 
 const fetchCurrentUserId = async () => {
   try {
-    const response = await axios.get("http://localhost:5000/auth/user", {
+    const response = await axios.get("/auth/user", {
       withCredentials: true,
     });
     return response.data.userId;
