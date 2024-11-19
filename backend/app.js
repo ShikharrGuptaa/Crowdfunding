@@ -16,6 +16,22 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URI || "http://localhost:5173");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204); // Respond to preflight requests
+  }
+
+  next();
+});
+
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET_KEY));
 
