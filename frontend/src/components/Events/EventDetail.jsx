@@ -8,7 +8,6 @@ const EventDetail = () => {
   const [event, setEvent] = useState(null);
   const [aggregatedContributors, setAggregatedContributors] = useState([]);
 
-
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -68,8 +67,7 @@ const EventDetail = () => {
           <strong>Raised:</strong> ${event.amountRaised}
         </p>
         <p className="text-gray-700 mb-2">
-          <strong>Deadline:</strong>{" "}
-          {new Date(event.deadline).toLocaleDateString()}
+          <strong>Deadline:</strong> {new Date(event.deadline).toDateString()}
         </p>
         <p className="text-gray-500 mb-2">
           <strong>Status:</strong> {event.status}
@@ -79,7 +77,7 @@ const EventDetail = () => {
       {/* Contribute Component */}
       <div className="mb-6">
         <h4 className="text-xl font-semibold mb-4">Contribute to this Event</h4>
-        <Contribute eventId={event._id}  />
+        <Contribute eventId={event._id} />
       </div>
 
       <div className="mt-6">

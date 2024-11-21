@@ -16,17 +16,16 @@ const Contribute = ({ eventId, contributorId }) => {
       setLoading(true);
       setError(null);
       const contributorId = await fetchCurrentUserId();
+      // console.log(contributorId);
 
       if(!contributorId) {
         throw new Error("Failed to retrieve user ID. Please login and try again.");
       }
     
-
       // Initiating checkout by getting URL
-      const { url } = await getCheckoutURL(eventId, amount, contributorId);
+      const url = await getCheckoutURL(eventId, amount, contributorId);
 
-      //Redirecting user to checkout page
-      window.location.href = url;
+      window.open(url, "_blank");
     } catch (err) {
       setError(`Failed to initiate payment. Please try again.`);
       console.error(err);

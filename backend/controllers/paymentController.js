@@ -14,16 +14,24 @@ exports.initiateContribution = async (req, res) => {
       amount,
       status: "pending",
     });
+    // console.log(amount);
 
     const savedContri = await newContri.save();
 
-    // LemonSqueezy Chekout session
+    // LemonSqueezy Checkout session
     const lemonSqueezyResponse = await axios
       .post(
         "https://api.lemonsqueezy.com/v1/checkouts",
         {
           data: {
             type: "checkouts", // Required by LemonSqueezy API
+            attributes: {
+              checkout_data : {
+                custom : {
+                  user_id : contributorId,
+                }
+              }
+            },
             relationships: {
               store: {
                 data: {
@@ -38,14 +46,7 @@ exports.initiateContribution = async (req, res) => {
                 },
               },
             },
-            attributes: {
-              custom_amount : amount,
-              metadata : {
-                contributionId: savedContri._id.toString(),
-                eventId: eventId,
-                userId: contributorId
-              }
-            }
+
           },
         },
         {
@@ -80,17 +81,25 @@ exports.initiateContribution = async (req, res) => {
 };
 
 exports.paymentWebhook = async (req, res) => {
-  const { contributionId, paymentStatus } = req.body.data.attributes.metadata;
-  try {
-    // Updating contribution
-    await Contribution.findByIdAndUpdate(contributionId, {
-      status: paymentStatus === "success" ? "paid" : "failed",
-    });
+  const { contributionId, paymentStatus } = req.body.data.attributes.checkout_data.custom;
 
-    res.status(200).json({ message: `Payment status updated successfully` });
+  try {
+    const contribution = await Contribution.findById(contributionId);
+
+    // Update Contribution Status
+    contribution.status = paymentStatus === "success" ? "paid" : "failed";
+    await contribution.save();
+
+    // Update Event's amountRaised if payment is successful
+    if (paymentStatus === "success") {
+      const event = await Event.findById(contribution.event);
+      event.amountRaised += contribution.amount;
+      await event.save();
+    }
+
+    res.status(200).json({ message: "Payment status updated successfully" });
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: `Error updating payment status`, error: err.message });
+    res.status(500).json({ message: "Error updating payment status", error: err.message });
   }
 };
+
